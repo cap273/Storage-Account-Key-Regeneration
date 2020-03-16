@@ -40,17 +40,17 @@ catch {
 }
 
 Write-Output "Getting key names from storage account [$storageAccountName] in resource group [$resourceGroupName]..."
-$storageAccountKeyNames = (Get-AzStorageAccountKey -ResourceGroupName resourceGroupName -Name $storageAccountName).KeyName
+$storageAccountKeyNames = (Get-AzStorageAccountKey -ResourceGroupName $resourceGroupName -Name $storageAccountName).KeyName
 Write-Output "Key names acquired. Key 1 Name: [$($storageAccountKeyNames[0])]. Key 2 Name: [$($storageAccountKeyNames[1])]."
 
 Write-Output "Regenerating first key: [$($storageAccountKeyNames[0])]..."
 New-AzStorageAccountKey -ResourceGroupName $resourceGroupName `
     -Name $storageAccountName `
-    -KeyName $storageAccountKeyNames[0] | Out-Null
+    -KeyName $storageAccountKeyNames[0]
 Write-Output "First key: [$($storageAccountKeyNames[0])] regenerated."
 
 Write-Output "Regenerating second key: [$($storageAccountKeyNames[1])]..."
 New-AzStorageAccountKey -ResourceGroupName $resourceGroupName `
     -Name $storageAccountName `
-    -KeyName $storageAccountKeyNames[1] | Out-Null
+    -KeyName $storageAccountKeyNames[1]
 Write-Output "Second key [$($storageAccountKeyNames[1])] regenerated."
