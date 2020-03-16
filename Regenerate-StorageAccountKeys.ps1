@@ -3,7 +3,12 @@
         Regenerates storage account keys of target Azure storage account.
 
         This PowerSchell script runs as a runbook in an Azure Automation Account, and authenticates to Azure
-        through a Service Principal using certificate 
+        through a Service Principal using certificate authentication. This service principal is *not* created
+        or configured as part of this script.
+
+        The following modules should have already been imported into the Azure Automation Account for this runbook to execute:
+        - Az.Accounts, version >= 1.7.3
+        - Az.Storage, version >= 1.13.0
 
     .NOTES
         AUTHOR: Carlos Patiño
