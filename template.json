@@ -1,0 +1,83 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "2.0.0.0",
+    "parameters": {
+        "accountName": {
+            "type": "String",
+            "metadata": {
+                "description": "Name of the Azure Automation Account."
+            },
+            "defaultValue": "testaccount"
+        },
+        "location": {
+            "type": "String",
+            "metadata": {
+                "description": "Azure region in which to deploy Azure Automation Account."
+            },
+            "defaultValue": "eastus2"
+        }
+    },
+    "variables":{
+        "runbookName": "Regenerate-StorageAccountKeys",
+        "runbookUri": "https://raw.githubusercontent.com/cap273/Storage-Account-Key-Regeneration/master/Regenerate-StorageAccountKeys.ps1"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Automation/automationAccounts",
+            "apiVersion": "2015-10-31",
+            "name": "[parameters('accountName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "sku": {
+                    "name": "Basic"
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('accountName'), '/', 'Az.Accounts')]",
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2015-10-31",
+            "properties": {
+                "contentLink": {
+                    "uri": "https://devopsgallerystorage.blob.core.windows.net/packages/az.accounts.1.7.3.nupkg"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('accountName'))]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('accountName'), '/', 'Az.Storage')]",
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2015-10-31",
+            "properties": {
+                "contentLink": {
+                    "uri": "https://devopsgallerystorage.blob.core.windows.net/packages/az.storage.1.13.0.nupkg"
+                }
+            },
+            "dependsOn": [
+               "[resourceId('Microsoft.Automation/automationAccounts', parameters('accountName'))]",
+               "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'), '/modules/', 'Az.Accounts')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runbooks",
+            "name": "[concat(parameters('accountName'), '/', variables('runbookName'))]",
+            "apiVersion": "2015-10-31",
+            "location": "[parameters('location')]",
+            "properties": {
+                "runbookType": "PowerShell",
+                "logVerbose": false,
+                "logProgress": false,
+                "publishContentLink": {
+                    "uri": "[variables('runbookUri')]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('accountName'))]"
+            ]
+        }
+    ]
+}
